@@ -1,0 +1,79 @@
+//-------------------------------------------------------------------------------------------//
+// This script requires a script injector to inject the below script onto the bookings page  //
+// The idea is to refresh the bookings page every x amount of seconds until a cancellation   //
+// is found and then display that on the page as a location + date with a green backgroud.   //
+// Other locations + dates outside of your criteria will show as red.                        //
+// Once a date is found - be quick and book! The script won't do that for you!               //
+//-------------------------------------------------------------------------------------------//
+
+// Ensure the script only runs on the bookings page
+var isSearchPage = $('h1')[0].innerText == "Find an Appointment";
+
+if(isSearchPage == true) {
+	// Refresh the page every 5 seconds (5000)
+	var timerId = setInterval(function () {
+		location.reload();
+	}, 5000);
+	
+	// Cancel the page refresh when the 'Enter' key is pressed (ensure the browser has focus)
+	$(document).keypress(function(e) {
+		if(e.which == 13) {
+			clearInterval(timerId);
+		}
+	});
+
+	// Template for displaying the location + earliest appointment date
+	var div = $.parseHTML('<div style="margin-left:10px;margin-top:10px;margin-bottom:10px;display:block;"></div>');
+
+	// Get the earliest appointments for the following locations (this can be amended by viewing the page source and finding your location id)
+	var lisburnDate = $('option[value="40"]').attr('data-firstavailable');
+	var malluskDate = $('option[value="42"]').attr('data-firstavailable');
+	var craigavonDate = $('option[value="36"]').attr('data-firstavailable');
+
+	// The location + date will show either red or green depending on the search month
+	// Change the searchMonth value for the month you wish to search up to (i.e. 9 = September))
+	var searchMonth = 9;
+	var style = $(div).attr('style');
+	
+	// Check to see if the earliest appointment is within your search criteria (searchMonth)
+	// If so set the background to green and cancel page refresh; if not set backgroud as red
+	
+	// Location 1
+	var check = craigavonDate != undefined ? craigavonDate.split('/')[1] : 99;
+	
+	if (check < 9){
+		style += 'background-color:#7df955;';
+		clearInterval(timerId);
+	} else {
+		style += 'background-color:#f9557d;';
+	}
+	
+	$(div).attr('style', style);
+	$('body').prepend($(div).clone().prop('innerHTML', 'Craigavon: ' + craigavonDate));	
+	
+	// Location 2
+	var check = malluskDate != undefined ? malluskDate.split('/')[1] : 99;
+	
+	if (check < 9){
+		style += 'background-color:#7df955;';
+		clearInterval(timerId);
+	} else {
+		style += 'background-color:#f9557d;';
+	}
+	
+	$(div).attr('style', style);
+	$('body').prepend($(div).clone().prop('innerHTML', 'Mallusk: ' + malluskDate));
+	
+	// Location 3
+	var check = lisburnDate != undefined ? lisburnDate.split('/')[1] : 99;
+	
+	if (check < 9){
+		style += 'background-color:#7df955;';
+		clearInterval(timerId);
+	} else {
+		style += 'background-color:#f9557d;';
+	}
+	
+	$(div).attr('style', style);
+	$('body').prepend($(div).clone().prop('innerHTML', 'Lisburn: ' + lisburnDate));
+}
